@@ -1,8 +1,8 @@
 import paho.mqtt.client as mqtt
 
-brokerAddress = "12a52b54af3f4191912ad167a7925c0e.s1.eu.hivemq.cloud"
-userName = "citak"
-passWord = "275452Ahmet"
+brokerAddress = "*************************"
+userName = "*************************"
+passWord = "*************************"
 topic = "my/test/topic"
 
 def on_connect(client, userdata, flags, rc):
