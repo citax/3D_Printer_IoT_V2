@@ -8,9 +8,9 @@ GPIO.setmode(GPIO.BCM)
 role_pin = 21
 GPIO.setup(role_pin, GPIO.OUT)
 
-brokerAddress = "12a52b54af3f4191912ad167a7925c0e.s1.eu.hivemq.cloud"
-userName = "citak"
-passWord = "275452Ahmet"
+brokerAddress = "*********************************************"
+userName = "****************"
+passWord = "****************"
 topic = "my/test/topic"
 data = "Hello From Raspi"
 
