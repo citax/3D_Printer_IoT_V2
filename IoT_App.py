@@ -1,4 +1,3 @@
-import kivy
 import os
 import cv2
 import paho.mqtt.client as mqtt
@@ -15,9 +14,10 @@ from PIL import Image as PILImage
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 
-brokerAddress = "*************************"
-userName = "*************************"
-passWord = "*************************"
+lastmsg = "A"
+brokerAddress = "12a52b54af3f4191912ad167a7925c0e.s1.eu.hivemq.cloud"
+userName = "citak"
+passWord = "275452Ahmet"
 topic = "my/test/topic"
 data = "Hello from Away Machine"
 
@@ -48,7 +48,7 @@ class MinimalistApp(App):
     def build(self):
         # Ana düzen
         self.layout = FloatLayout()
-        self.image = Image(pos_hint={'center_x': 0.7, 'center_y': 0.5}, size_hint=(0.5, 0.4),
+        self.image = Image(pos_hint={'center_x': 0.7, 'center_y': 0.5}, size_hint=(0.7, 0.5),
                            allow_stretch=True, keep_ratio=True)  # allow_stretch ve keep_ratio özellikleri eklendi
         self.layout.add_widget(self.image)
 
@@ -62,48 +62,30 @@ class MinimalistApp(App):
         button2.bind(on_press=self.on_button2_press)
         self.layout.add_widget(button2)
 
-        # Refresh Button
-        button3 = Button(text='Refresh Photo', size_hint=(None, None), size=(250, 100), pos_hint={'center_x': 0.2, 'center_y': 0.4})
+        # GPIO Off Button
+        button3 = Button(text='GPIO Off', size_hint=(None, None), size=(250, 100), pos_hint={'center_x': 0.2, 'center_y': 0.4})
         button3.bind(on_press=self.on_button3_press)
         self.layout.add_widget(button3)
 
-        # GPIO On/Off Button
-        button4 = Button(text='GPIO On/Off', size_hint=(None, None), size=(250, 100), pos_hint={'center_x': 0.2, 'center_y': 0.2})
+        # GPIO On Button
+        button4 = Button(text='GPIO On', size_hint=(None, None), size=(250, 100), pos_hint={'center_x': 0.2, 'center_y': 0.2})
         button4.bind(on_press=self.on_button4_press)
         self.layout.add_widget(button4)
 
         # Uygulama başlatıldığında çalıştırılacak kod
         self.on_start_app()
 
-        return self.layout
-        
-
-    def refresh_photo(self, instance):
-        # Burada mevcut fotoğrafı yenileme işlemini gerçekleştirebilirsiniz
-        # Yenileme işlemini fotoğrafı tekrar yükleyerek yapacağım.
-
-        self.load_photo(None)
+        return self.layout    
 
     def on_start_app(self):
-        # Uygulama başlatıldığında çalışacak kod buraya gelecek
         print("Program is Starting..")
-
         client.tls_set(tls_version=mqtt.ssl.PROTOCOL_TLS)
         client.username_pw_set(userName, passWord)
         client.connect(brokerAddress, 8883)
         client.publish(topic, data) 
         
-        # Arka planda çalışacak kodu buraya ekleyebilirsiniz
-
     def on_button1_press(self, instance):                       
         # Photo Load Button.                       
-        # Burada fotoğraf yükleme işlemini gerçekleştirebilirsiniz
-        # Örneğin, dosya seçme iletkisi kullanabilirsiniz.
-        # Benim örneğimde, mevcut bir fotoğrafı kullanıyorum.
-
-        # Fotoğrafın yolunu ve adını düzenleyin
-        
-        # Kivy Image nesnesine fotoğrafı yükle
         pil_image = PILImage.open(photo_path)
         pil_image = pil_image.transpose(PILImage.FLIP_TOP_BOTTOM)
         pil_image = pil_image.resize((800, 600))  # Resmi daha büyük yapmak için boyutu arttırdık
@@ -112,40 +94,34 @@ class MinimalistApp(App):
         texture.blit_buffer(buf, colorfmt='rgb', bufferfmt='ubyte')
         self.image.texture = texture
 
-
     def on_button2_press(self, instance):
         # Send Request Button.
+        lastmsg = "Y"
         info = "Y"
         client.publish(topic, info)
         client.connect(brokerAddress, 8883)
         client.subscribe(topic)
         print("Waiting for Photo")
         client.loop_start()
-        time.sleep(10)
+        time.sleep(20)
         client.loop_stop()
 
     def on_button3_press(self, instance):
-        # Refresh Photo Button.
-        self.on_button1_press(None)
-
+        # GPIO Close Button.
+        global lastmsg
+        if( lastmsg != "C"):
+            info = "C"
+            lastmsg = "C"
+            client.publish(topic, info)
+    
     def on_button4_press(self, instance):
-        # GPIO On/Off Button.
-        self.show_popup("")
-
-    def show_popup(self, message):
-        # Pop-up içeriği
-        content = FloatLayout()
-        content.add_widget(Label(text=message))
-        content.add_widget(Button(text='Kapat', size_hint=(None, None), size=(100, 50), pos_hint={'center_x': 0.5, 'y': 0.1}, on_press=self.close_popup))
-
-        # Pop-up penceresi
-        popup = Popup(title='Show Photo', content=content, size_hint=(None, None), size=(400, 200), auto_dismiss=False)
-        self.current_popup = popup  # pop-up referansını sakla
-        popup.open()
-
-    def close_popup(self, instance):
-        # Pop-up penceresini kapatma metodu
-        self.current_popup.dismiss()
+        # GPIO On Button.
+        global lastmsg
+        if(lastmsg != "O"):
+            info = "O"
+            lastmsg = "O"
+            client.publish(topic, info)
 
 if __name__ == '__main__':
     MinimalistApp().run()
+
